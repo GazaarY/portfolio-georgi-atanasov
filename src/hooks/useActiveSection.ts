@@ -1,10 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 
-export function useActiveSection(
-  sectionIds: string[],
-  rootMargin = "-40% 0px -55% 0px",
-) {
+export function useActiveSection(sectionIds: string[], rootMargin = "-40% 0px -55% 0px") {
   const [active, setActive] = useState<string>(sectionIds[0] ?? "");
 
   useEffect(() => {
