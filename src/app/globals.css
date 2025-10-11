@@ -10,19 +10,33 @@
    ================================ */
 @layer base {
   /* Keep native UI in light mode (your choice) */
-  html { color-scheme: light; }
+  html {
+    color-scheme: light;
+  }
 
   /* Page background + main text (matte spring) */
-  body { @apply bg-paper-50 text-gy-800 antialiased; }
+  body {
+    @apply bg-paper-50 text-gy-800 antialiased;
+  }
 
   /* Headings slightly darker than body */
-  h1, h2, h3, h4 { @apply text-gy-900; }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply text-gy-900;
+  }
 
   /* Muted/secondary copy */
-  small, .muted { @apply text-gy-600; }
+  small,
+  .muted {
+    @apply text-gy-600;
+  }
 
   /* Hairline dividers */
-  hr { @apply border-hairline; }
+  hr {
+    @apply border-hairline;
+  }
 
   /**
    * Content-only links:
@@ -39,20 +53,30 @@
    ================================ */
 @layer components {
   /* Page container: same width/padding everywhere */
-  .gy-container { @apply container mx-auto max-w-[1100px] px-4 md:px-6; }
+  .gy-container {
+    @apply container mx-auto max-w-[1100px] px-4 md:px-6;
+  }
 
   /* Brand (site title/logo) — never underlined */
-  .gy-brand { @apply no-underline hover:no-underline text-gy-900 font-semibold tracking-tight; }
+  .gy-brand {
+    @apply no-underline hover:no-underline text-gy-900 font-semibold tracking-tight;
+  }
 
   /* Header nav links: no underline by default, underline on hover */
   .gy-navlink {
     @apply no-underline text-gy-700 hover:text-gy-900 underline-offset-4 decoration-gy-300;
   }
-  .gy-navlink:hover { @apply underline; }
-  .gy-navlink[aria-current="page"] { @apply text-gy-900; }
+  .gy-navlink:hover {
+    @apply underline;
+  }
+  .gy-navlink[aria-current="page"] {
+    @apply text-gy-900;
+  }
 
   /* Generic link you can use anywhere (same tone as .gy-prose a) */
-  .gy-link { @apply text-gy-700 hover:text-gy-900 underline underline-offset-4 decoration-gy-300; }
+  .gy-link {
+    @apply text-gy-700 hover:text-gy-900 underline underline-offset-4 decoration-gy-300;
+  }
 
   /* Primary button */
   .gy-btn {
@@ -66,16 +90,22 @@
   }
 
   /* Card (used for little pills/hero and general cards) */
-  .gy-card { @apply rounded-2xl border border-hairline bg-white shadow-sm; }
+  .gy-card {
+    @apply rounded-2xl border border-hairline bg-white shadow-sm;
+  }
 }
 
 /* ================================
    Motion & scrolling
    ================================ */
-html:focus-within { scroll-behavior: smooth; }
+html:focus-within {
+  scroll-behavior: smooth;
+}
 
 @media (prefers-reduced-motion: reduce) {
-  html:focus-within { scroll-behavior: auto; }
+  html:focus-within {
+    scroll-behavior: auto;
+  }
   * {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;

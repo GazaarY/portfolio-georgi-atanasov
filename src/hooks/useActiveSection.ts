@@ -1,7 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
 
-export function useActiveSection(sectionIds: string[], rootMargin = "-40% 0px -55% 0px") {
+export function useActiveSection(
+  sectionIds: string[],
+  rootMargin = "-40% 0px -55% 0px",
+) {
   const [active, setActive] = useState<string>(sectionIds[0] ?? "");
 
   useEffect(() => {
@@ -11,9 +14,11 @@ export function useActiveSection(sectionIds: string[], rootMargin = "-40% 0px -5
 
     const io = new IntersectionObserver(
       (entries) => {
-        entries.forEach((e) => { if (e.isIntersecting) setActive(e.target.id); });
+        entries.forEach((e) => {
+          if (e.isIntersecting) setActive(e.target.id);
+        });
       },
-      { threshold: 0.01, root: null, rootMargin }
+      { threshold: 0.01, root: null, rootMargin },
     );
 
     els.forEach((el) => io.observe(el));

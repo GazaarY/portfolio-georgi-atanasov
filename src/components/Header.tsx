@@ -48,7 +48,7 @@ export default function Header() {
   useEffect(() => {
     if (!open || !panelRef.current) return;
     const nodes = panelRef.current.querySelectorAll<HTMLElement>(
-      'a, button, [tabindex]:not([tabindex="-1"])'
+      'a, button, [tabindex]:not([tabindex="-1"])',
     );
     const first = nodes[0];
     const last = nodes[nodes.length - 1];
@@ -78,12 +78,19 @@ export default function Header() {
     <header className="sticky top-0 z-50 bg-white/70 backdrop-blur">
       <div className="gy-container flex h-16 items-center justify-between">
         {/* Brand */}
-        <Link href="/" className={`gy-brand ${focusStyles}`} aria-label="Go to homepage">
+        <Link
+          href="/"
+          className={`gy-brand ${focusStyles}`}
+          aria-label="Go to homepage"
+        >
           GazaarY
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden sm:flex items-center gap-8 text-sm" aria-label="Primary">
+        <nav
+          className="hidden sm:flex items-center gap-8 text-sm"
+          aria-label="Primary"
+        >
           {NAV.map((item) => {
             const isActive = activeId === item.id;
             return (

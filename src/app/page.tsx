@@ -9,7 +9,8 @@ export default function Home() {
       <Section id="work" className="mt-8">
         <div className="gy-card p-6">
           <p className="text-gy-800">
-            If this text looks slate-ish (not pure black), your `gy` palette is active.
+            If this text looks slate-ish (not pure black), your `gy` palette is
+            active.
           </p>
           <div className="mt-3 flex gap-3">
             <button className="gy-btn">Primary</button>

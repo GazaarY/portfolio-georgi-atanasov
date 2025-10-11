@@ -2,7 +2,7 @@ import * as React from "react";
 
 type SectionProps = React.PropsWithChildren<{
   id: string;
-  as?: React.ElementType;     // ← no JSX namespace
+  as?: React.ElementType; // ← no JSX namespace
   className?: string;
 }>;
 
