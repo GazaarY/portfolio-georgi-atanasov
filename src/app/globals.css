@@ -1,0 +1,70 @@
+/* ================================
+   Tailwind layers
+   ================================ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ================================
+   GazaarY base tokens & defaults
+   ================================ */
+@layer base {
+  /* Keep native UI in light mode (your choice) */
+  html { color-scheme: light; }
+
+  /* Page background + main text (matte spring) */
+  body { @apply bg-paper-50 text-gy-800 antialiased; }
+
+  /* Headings slightly darker than body */
+  h1, h2, h3, h4 { @apply text-gy-900; }
+
+  /* Muted/secondary copy */
+  small, .muted { @apply text-gy-600; }
+
+  /* Hairline dividers */
+  hr { @apply border-hairline; }
+
+  /**
+   * Content-only links:
+   * Apply `.gy-prose` on any content container (article/markdown)
+   * so only “content links” get underlined—navigation/brand links stay clean.
+   */
+  .gy-prose a {
+    @apply text-gy-700 hover:text-gy-900 underline underline-offset-4 decoration-gy-300;
+  }
+}
+
+/* ================================
+   Reusable primitives (header/footer/sections)
+   ================================ */
+@layer components {
+  /* Page container: same width/padding everywhere */
+  .gy-container { @apply container mx-auto max-w-[1100px] px-4 md:px-6; }
+
+  /* Brand (site title/logo) — never underlined */
+  .gy-brand { @apply no-underline hover:no-underline text-gy-900 font-semibold tracking-tight; }
+
+  /* Header nav links: no underline by default, underline on hover */
+  .gy-navlink {
+    @apply no-underline text-gy-700 hover:text-gy-900 underline-offset-4 decoration-gy-300;
+  }
+  .gy-navlink:hover { @apply underline; }
+  .gy-navlink[aria-current="page"] { @apply text-gy-900; }
+
+  /* Generic link you can use anywhere (same tone as .gy-prose a) */
+  .gy-link { @apply text-gy-700 hover:text-gy-900 underline underline-offset-4 decoration-gy-300; }
+
+  /* Primary button */
+  .gy-btn {
+    @apply inline-flex items-center justify-center rounded-md px-4 py-2
+           text-sm font-medium bg-gy-900 text-white hover:bg-gy-800 transition;
+  }
+
+  /* Ghost button */
+  .gy-btn--ghost {
+    @apply bg-transparent text-gy-900 hover:text-gy-800 border border-gy-300;
+  }
+
+  /* Card (used for little pills/hero and general cards) */
+  .gy-card { @apply rounded-2xl border border-hairline bg-white shadow-sm; }
+}
