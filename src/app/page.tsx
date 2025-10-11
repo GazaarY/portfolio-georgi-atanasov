@@ -1,3 +1,6 @@
+// src/app/page.tsx
+import Link from "next/link";
+
 export default function Home() {
   return (
     <main className="flex-1 pt-10 md:pt-16">
@@ -11,9 +14,9 @@ export default function Home() {
           <div className="mt-3 flex gap-3">
             <button className="gy-btn">Primary</button>
             <button className="gy-btn gy-btn--ghost">Ghost</button>
-            <a className="gy-link" href="#work">
+            <Link className="gy-link" href="#work">
               Link sample
-            </a>
+            </Link>
           </div>
         </div>
       </section>
