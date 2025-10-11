@@ -1,4 +1,6 @@
 // src/components/Footer.tsx
+import Link from "next/link";
+
 export default function Footer() {
   return (
     <footer className="bg-white/70 backdrop-blur">
@@ -7,8 +9,12 @@ export default function Footer() {
         {/* LEFT (desktop) / MIDDLE (mobile) — legal links */}
         <div className="order-2 sm:order-1 pl-4 md:pl-6">
           <nav className="flex gap-5 sm:gap-4">
-            <a href="/impressum" className="gy-navlink">Impressum</a>
-            <a href="/privacy" className="gy-navlink">Datenschutz</a>
+            <Link href="/impressum" className="gy-navlink">
+              Impressum
+            </Link>
+            <Link href="/privacy" className="gy-navlink">
+              Datenschutz
+            </Link>
           </nav>
         </div>
 

@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
@@ -19,7 +20,7 @@ export default function Header() {
   const isCurrent = (href: string) =>
     (href.startsWith("/#") ? href.slice(1) : href) === hash ? "page" : undefined;
 
-  // Common focus styles for all links & button
+  // Common focus styles for all links & buttons
   const focusStyles =
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 rounded-md";
 
@@ -27,37 +28,33 @@ export default function Header() {
     <header className="sticky top-0 z-50 bg-white/70 backdrop-blur">
       <div className="gy-container flex h-16 items-center justify-between">
         {/* Brand */}
-        <a
-          href="/"
-          className={`gy-brand ${focusStyles}`}
-          aria-label="Go to homepage"
-        >
+        <Link href="/" className={`gy-brand ${focusStyles}`} aria-label="Go to homepage">
           GazaarY
-        </a>
+        </Link>
 
         {/* Desktop nav */}
         <nav className="hidden sm:flex items-center gap-8 text-sm">
-          <a
+          <Link
             href="/#work"
             className={`gy-navlink ${focusStyles}`}
             aria-current={isCurrent("/#work")}
           >
             Work
-          </a>
-          <a
+          </Link>
+          <Link
             href="/#about"
             className={`gy-navlink ${focusStyles}`}
             aria-current={isCurrent("/#about")}
           >
             About
-          </a>
-          <a
+          </Link>
+          <Link
             href="/#contact"
             className={`gy-navlink ${focusStyles}`}
             aria-current={isCurrent("/#contact")}
           >
             Contact
-          </a>
+          </Link>
         </nav>
 
         {/* Mobile menu button */}
@@ -99,30 +96,30 @@ export default function Header() {
       >
         <nav className="py-3">
           <div className="gy-container flex flex-col gap-3 text-sm">
-            <a
+            <Link
               href="/#work"
               className={`gy-navlink ${focusStyles}`}
               aria-current={isCurrent("/#work")}
               onClick={() => setOpen(false)}
             >
               Work
-            </a>
-            <a
+            </Link>
+            <Link
               href="/#about"
               className={`gy-navlink ${focusStyles}`}
               aria-current={isCurrent("/#about")}
               onClick={() => setOpen(false)}
             >
               About
-            </a>
-            <a
+            </Link>
+            <Link
               href="/#contact"
               className={`gy-navlink ${focusStyles}`}
               aria-current={isCurrent("/#contact")}
               onClick={() => setOpen(false)}
             >
               Contact
-            </a>
+            </Link>
           </div>
         </nav>
       </div>
