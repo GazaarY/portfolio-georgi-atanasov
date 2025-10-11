@@ -68,3 +68,17 @@
   /* Card (used for little pills/hero and general cards) */
   .gy-card { @apply rounded-2xl border border-hairline bg-white shadow-sm; }
 }
+
+/* ================================
+   Motion & scrolling
+   ================================ */
+html:focus-within { scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within { scroll-behavior: auto; }
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
