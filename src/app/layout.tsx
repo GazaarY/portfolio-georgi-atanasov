@@ -3,42 +3,26 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import type React from "react";
-import { useState } from "react";
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // Robust, no-Tailwind-variant skip link visibility
-  const [showSkip, setShowSkip] = useState(false);
-
-  // Base visual styles for the link; we toggle only the transform
-  const skipBase: React.CSSProperties = {
-    position: "fixed",
-    left: 16, // 1rem (px to avoid Tailwind dep)
-    top: 16,
-    zIndex: 100,
-    padding: "0.5rem 0.75rem",
-    borderRadius: 6,
-    background: "#fff",
-    color: "#0f172a", // slate-900-ish
-    boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
-    outline: showSkip ? "2px solid #34d399" : "none", // accent ring on focus
-    outlineOffset: 2,
-    transition: "transform 150ms ease",
-    transform: showSkip ? "translateY(0)" : "translateY(-200%)",
-  };
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning>
-        {/* Skip link for keyboard users (self-contained, no extra CSS needed) */}
+        {/* Skip link for keyboard users */}
         <a
           href="#work"
-          onFocus={() => setShowSkip(true)}
-          onBlur={() => setShowSkip(false)}
-          style={skipBase}
+          className="
+            fixed left-4 top-4 z-[100]
+            -translate-y-24 focus-visible:translate-y-0
+            transition-transform
+            rounded-md bg-white px-3 py-2 shadow
+            text-gy-900
+            focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-400
+          "
         >
           Skip to content
         </a>
