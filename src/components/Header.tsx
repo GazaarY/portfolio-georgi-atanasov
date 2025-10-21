@@ -16,26 +16,44 @@ export default function Header() {
   const panelRef = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
 
-  // Active section from viewport (IntersectionObserver)
+  // Viewport-based active section
   const activeId = useActiveSection(NAV.map((n) => n.id));
 
-  // Close on Esc + outside click
+  // Keep aria-current correct when user navigates by hash (e.g., clicking a link or a skip link)
+  const [hashId, setHashId] = useState<string>("");
   useEffect(() => {
-    function onKey(e: KeyboardEvent) {
+    const sync = () => setHashId(window.location.hash.replace(/^#/, ""));
+    sync();
+    window.addEventListener("hashchange", sync);
+    return () => window.removeEventListener("hashchange", sync);
+  }, []);
+
+  // Decide which one wins (hash if present, otherwise observer)
+  const currentId = hashId || activeId || "";
+
+  const isCurrent = (href: string) => {
+    const id = href.replace(/^\/?#/, ""); // strips "/#" or "#"
+    return id && id === currentId ? ("page" as const) : undefined;
+  };
+
+  // Close on Esc and on outside click
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
-    }
-    function onClick(e: MouseEvent) {
+    };
+    const onClick = (e: MouseEvent) => {
       if (!open) return;
-      const t = e.target as Node;
+      const target = e.target as Node;
       if (
         panelRef.current &&
-        !panelRef.current.contains(t) &&
+        !panelRef.current.contains(target) &&
         btnRef.current &&
-        !btnRef.current.contains(t)
+        !btnRef.current.contains(target)
       ) {
         setOpen(false);
       }
-    }
+    };
+
     document.addEventListener("keydown", onKey);
     document.addEventListener("mousedown", onClick);
     return () => {
@@ -44,33 +62,36 @@ export default function Header() {
     };
   }, [open]);
 
-  // Focus trap when mobile menu is open
+  // Focus trap while the mobile menu is open
   useEffect(() => {
     if (!open || !panelRef.current) return;
-    const nodes = panelRef.current.querySelectorAll<HTMLElement>(
-      'a, button, [tabindex]:not([tabindex="-1"])',
+
+    const nodes = Array.from(
+      panelRef.current.querySelectorAll<HTMLElement>(
+        'a, button, [tabindex]:not([tabindex="-1"])',
+      ),
     );
     const first = nodes[0];
     const last = nodes[nodes.length - 1];
 
-    function onTab(e: KeyboardEvent) {
+    const onTab = (e: KeyboardEvent) => {
       if (e.key !== "Tab" || nodes.length === 0) return;
-      const active = document.activeElement;
-      if (e.shiftKey && active === first) {
+      const activeEl = document.activeElement;
+      if (e.shiftKey && activeEl === first) {
         e.preventDefault();
         last?.focus();
-      } else if (!e.shiftKey && active === last) {
+      } else if (!e.shiftKey && activeEl === last) {
         e.preventDefault();
         first?.focus();
       }
-    }
+    };
 
     document.addEventListener("keydown", onTab);
     first?.focus();
+
     return () => document.removeEventListener("keydown", onTab);
   }, [open]);
 
-  // Common focus styles for all links & buttons
   const focusStyles =
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 rounded-md";
 
@@ -85,15 +106,15 @@ export default function Header() {
         {/* Desktop nav */}
         <nav className="hidden sm:flex items-center gap-8 text-sm" aria-label="Primary">
           {NAV.map((item) => {
-            const isActive = activeId === item.id;
+            const current = isCurrent(item.href);
             return (
               <Link
                 key={item.id}
                 href={item.href}
                 className={`gy-navlink ${focusStyles} ${
-                  isActive ? "font-semibold underline underline-offset-4" : ""
+                  current ? "font-semibold underline underline-offset-4" : ""
                 }`}
-                aria-current={isActive ? "page" : undefined}
+                aria-current={current}
               >
                 {item.label}
               </Link>
@@ -111,7 +132,6 @@ export default function Header() {
           onClick={() => setOpen((v) => !v)}
           className={`sm:hidden inline-flex items-center justify-center w-9 h-9 rounded-md border border-gy-200 text-gy-700 hover:bg-gy-50 active:translate-y-[1px] transition ${focusStyles}`}
         >
-          {/* simple hamburger / X */}
           <span className="relative block w-4">
             <span
               className={`absolute inset-x-0 block h-0.5 bg-gy-900 transition-transform ${
@@ -146,17 +166,22 @@ export default function Header() {
       >
         <nav className="py-3" aria-label="Primary mobile">
           <div className="gy-container flex flex-col gap-3 text-sm">
-            {NAV.map((item) => (
-              <Link
-                key={item.id}
-                href={item.href}
-                onClick={() => setOpen(false)}
-                className={`gy-navlink ${focusStyles}`}
-                aria-current={activeId === item.id ? "page" : undefined}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {NAV.map((item) => {
+              const current = isCurrent(item.href);
+              return (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  onClick={() => setOpen(false)}
+                  className={`gy-navlink ${focusStyles} ${
+                    current ? "font-semibold underline underline-offset-4" : ""
+                  }`}
+                  aria-current={current}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </div>
         </nav>
       </div>

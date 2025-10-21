@@ -23,15 +23,20 @@ export default function Home() {
 
       {/* ABOUT */}
       <Section id="about" className="py-20 md:py-28">
-        <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-gy-900">About</h2>
+        <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-gy-900">
+          About
+        </h2>
         <p className="mt-3 text-gy-700 max-w-2xl">
           Short section placeholder. Replace with your story when ready.
         </p>
       </Section>
 
       {/* CONTACT */}
-      <Section id="contact" className="py-20 md:py-28">
-        <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-gy-900">Contact</h2>
+      {/* Add min-height so it intersects the viewport even at the very bottom */}
+      <Section id="contact" className="py-20 md:py-28 min-h-[70vh]">
+        <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-gy-900">
+          Contact
+        </h2>
         <p className="mt-3 text-gy-700 max-w-2xl">
           Short section placeholder. Add your preferred contact method here.
         </p>
