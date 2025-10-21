@@ -46,6 +46,29 @@
   .gy-prose a {
     @apply text-gy-700 hover:text-gy-900 underline underline-offset-4 decoration-gy-300;
   }
+
+  /* Global keyboard-focus styling (visible only on keyboard navigation) */
+  a:focus-visible,
+  button:focus-visible,
+  [role="button"]:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  summary:focus-visible {
+    outline: 2px solid theme("colors.accent.400", #34d399);
+    outline-offset: 2px;
+  }
+
+  /* Remove legacy focus ring when not keyboard-initiated */
+  a:focus:not(:focus-visible),
+  button:focus:not(:focus-visible),
+  [role="button"]:focus:not(:focus-visible),
+  input:focus:not(:focus-visible),
+  select:focus:not(:focus-visible),
+  textarea:focus:not(:focus-visible),
+  summary:focus:not(:focus-visible) {
+    outline: none;
+  }
 }
 
 /* ================================
@@ -92,6 +115,20 @@
   /* Card (used for little pills/hero and general cards) */
   .gy-card {
     @apply rounded-2xl border border-hairline bg-white shadow-sm;
+  }
+
+  /**
+   * Optional helper: .skip-link
+   * You can apply this class to the skip link instead of inline styles if you prefer.
+   * It stays off-screen until focused (keyboard Tab), then slides into view.
+   */
+  .skip-link {
+    @apply fixed left-4 top-4 z-[100] rounded-md bg-white px-3 py-2 shadow text-gy-900;
+    transform: translateY(-200%);
+    transition: transform 150ms ease;
+  }
+  .skip-link:focus-visible {
+    transform: translateY(0);
   }
 }
 
