@@ -19,41 +19,39 @@ export default function Header() {
   // Viewport-based active section
   const activeId = useActiveSection(NAV.map((n) => n.id));
 
-  // Keep aria-current correct when user navigates by hash (e.g., clicking a link or a skip link)
+  // Hash fallback (keeps aria-current correct on hash navigation / skip link)
   const [hashId, setHashId] = useState<string>("");
   useEffect(() => {
-    const sync = () => setHashId(window.location.hash.replace(/^#/, ""));
-    sync();
-    window.addEventListener("hashchange", sync);
-    return () => window.removeEventListener("hashchange", sync);
+    const update = () => setHashId(window.location.hash.replace("#", ""));
+    update();
+    window.addEventListener("hashchange", update);
+    return () => window.removeEventListener("hashchange", update);
   }, []);
 
-  // Decide which one wins (hash if present, otherwise observer)
+  // Decide which id is "current" (URL hash wins, else observer)
   const currentId = hashId || activeId || "";
-
   const isCurrent = (href: string) => {
-    const id = href.replace(/^\/?#/, ""); // strips "/#" or "#"
-    return id && id === currentId ? ("page" as const) : undefined;
+    const id = href.replace("/#", "").replace("#", "");
+    return id && id === currentId ? "page" : undefined;
   };
 
-  // Close on Esc and on outside click
+  // Close on Esc + outside click
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
     };
     const onClick = (e: MouseEvent) => {
       if (!open) return;
-      const target = e.target as Node;
+      const t = e.target as Node;
       if (
         panelRef.current &&
-        !panelRef.current.contains(target) &&
+        !panelRef.current.contains(t) &&
         btnRef.current &&
-        !btnRef.current.contains(target)
+        !btnRef.current.contains(t)
       ) {
         setOpen(false);
       }
     };
-
     document.addEventListener("keydown", onKey);
     document.addEventListener("mousedown", onClick);
     return () => {
@@ -62,7 +60,7 @@ export default function Header() {
     };
   }, [open]);
 
-  // Focus trap while the mobile menu is open
+  // Focus trap when mobile menu is open
   useEffect(() => {
     if (!open || !panelRef.current) return;
 
@@ -76,7 +74,8 @@ export default function Header() {
 
     const onTab = (e: KeyboardEvent) => {
       if (e.key !== "Tab" || nodes.length === 0) return;
-      const activeEl = document.activeElement;
+      const activeEl: Element | null = document.activeElement;
+
       if (e.shiftKey && activeEl === first) {
         e.preventDefault();
         last?.focus();
@@ -88,7 +87,6 @@ export default function Header() {
 
     document.addEventListener("keydown", onTab);
     first?.focus();
-
     return () => document.removeEventListener("keydown", onTab);
   }, [open]);
 

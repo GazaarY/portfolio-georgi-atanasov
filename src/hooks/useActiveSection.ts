@@ -1,69 +1,50 @@
 // src/hooks/useActiveSection.ts
 "use client";
+
 import { useEffect, useState } from "react";
 
-/**
- * Scroll-based active section:
- * - Picks the last section whose top is above a pick-line (35% of viewport).
- * - If the user is at the bottom of the document, force the last section.
- * - If the last section's top is inside the viewport by 60%, also force it.
- */
-export function useActiveSection(sectionIds: string[]) {
+export function useActiveSection(
+  sectionIds: string[],
+  rootMargin = "-40% 0px -55% 0px"
+) {
   const [active, setActive] = useState<string>(sectionIds[0] ?? "");
 
   useEffect(() => {
-    if (sectionIds.length === 0) return;
+    const els = sectionIds
+      .map((id) => document.getElementById(id))
+      .filter(Boolean) as HTMLElement[];
+    if (els.length === 0) return;
 
-    const picklinePct = 0.35; // where we decide a section is “current”
-    const contactId = sectionIds[sectionIds.length - 1];
+    const visible = new Map<string, IntersectionObserverEntry>();
 
-    const compute = () => {
-      const docEl = document.documentElement;
-      const vh = window.innerHeight;
-      const line = Math.round(vh * picklinePct);
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          const id = (e.target as HTMLElement).id;
+          if (e.isIntersecting) {
+            visible.set(id, e);
+          } else {
+            visible.delete(id);
+          }
+        });
 
-      // 1) Force last section if we're effectively at page bottom.
-      const atBottom =
-        Math.ceil(window.scrollY + vh) >= docEl.scrollHeight - 1;
-
-      if (atBottom) {
-        setActive(contactId);
-        return;
-      }
-
-      // 2) If the last section has entered 60% of viewport, force it.
-      const contactEl = document.getElementById(contactId);
-      if (contactEl) {
-        const r = contactEl.getBoundingClientRect();
-        if (r.top <= vh * 0.6) {
-          setActive(contactId);
-          return;
+        if (visible.size) {
+          const top = [...visible.values()].sort(
+            (a, b) =>
+              b.intersectionRatio - a.intersectionRatio ||
+              sectionIds.indexOf((a.target as HTMLElement).id) -
+                sectionIds.indexOf((b.target as HTMLElement).id)
+          )[0];
+          const topId = (top.target as HTMLElement).id;
+          if (topId && topId !== active) setActive(topId);
         }
-      }
+      },
+      { threshold: [0, 0.25, 0.5, 0.75, 1], root: null, rootMargin }
+    );
 
-      // 3) Otherwise pick the last section whose top is above the pick-line.
-      let current = sectionIds[0];
-      for (const id of sectionIds) {
-        const el = document.getElementById(id);
-        if (!el) continue;
-        const { top } = el.getBoundingClientRect();
-        if (top <= line) current = id;
-      }
-      setActive(current);
-    };
-
-    // run now + on scroll/resize
-    compute();
-    const onScroll = () => compute();
-    const onResize = () => compute();
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onResize);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
-    };
-  }, [sectionIds]);
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [sectionIds, rootMargin]);
 
   return active;
 }
