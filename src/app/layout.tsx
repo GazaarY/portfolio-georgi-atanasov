@@ -3,14 +3,25 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import type React from "react";
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning>
         {/* Skip link for keyboard users */}
         <a
           href="#work"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:rounded-md focus:bg-white focus:px-3 focus:py-2 focus:shadow"
+          className="
+            fixed left-4 top-4 z-[100]
+            -translate-y-24 focus-visible:translate-y-0
+            transition-transform
+            rounded-md bg-white px-3 py-2 shadow
+            text-gy-900
+            focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-400
+          "
         >
           Skip to content
         </a>
