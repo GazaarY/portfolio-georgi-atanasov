@@ -124,16 +124,42 @@ export default function Header() {
   aria-controls="mobile-menu"
   aria-expanded={open}
   onClick={() => setOpen((v) => !v)}
-  className={`sm:hidden inline-flex items-center justify-center w-9 h-9 rounded-md border border-gy-200 text-gy-700 hover:bg-gy-50 active:translate-y-[1px] transition ${focusStyles} overflow-hidden p-2`}
+  className={`sm:hidden inline-flex items-center justify-center w-9 h-9 rounded-md border border-gy-200 text-gy-700 hover:bg-gy-50 active:translate-y-[1px] transition ${focusStyles} overflow-hidden p-2 relative`}
 >
-  {/* perfectly centered 3-line icon */}
-  <svg width="20" height="12" viewBox="0 0 20 12" aria-hidden="true" className={`${open ? "opacity-0" : "opacity-100"} transition-opacity`}>
-    <path d="M1 1H19 M1 6H19 M1 11H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+  {/* Hamburger */}
+  <svg
+    width="20"
+    height="12"
+    viewBox="0 0 20 12"
+    aria-hidden="true"
+    shapeRendering="geometricPrecision"
+    className={`${open ? "opacity-0" : "opacity-100"} transition-opacity duration-150 block`}
+  >
+    <path
+      d="M2 2H18 M2 6H18 M2 10H18"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      vectorEffect="non-scaling-stroke"
+    />
   </svg>
 
-  {/* X icon for open state */}
-  <svg width="20" height="12" viewBox="0 0 20 12" aria-hidden="true" className={`${open ? "opacity-100" : "opacity-0"} transition-opacity absolute`}>
-    <path d="M3 1 L17 11 M17 1 L3 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+  {/* X */}
+  <svg
+    width="20"
+    height="12"
+    viewBox="0 0 20 12"
+    aria-hidden="true"
+    shapeRendering="geometricPrecision"
+    className={`${open ? "opacity-100" : "opacity-0"} transition-opacity duration-150 absolute inset-0 m-auto block`}
+  >
+    <path
+      d="M3 2 L17 10 M17 2 L3 10"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      vectorEffect="non-scaling-stroke"
+    />
   </svg>
 </button>
       </div>
