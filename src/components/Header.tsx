@@ -127,40 +127,41 @@ export default function Header() {
           className={`sm:hidden inline-flex items-center justify-center w-9 h-9 rounded-md border border-gy-200 text-gy-700 hover:bg-gy-50 active:translate-y-[1px] transition ${focusStyles} overflow-hidden p-2 relative`}
         >
           {/* Hamburger (22x14, bars at y=3/7/11) */}
-          <svg
-            width="22"
-            height="14"
-            viewBox="0 0 22 14"
-            aria-hidden="true"
-            shapeRendering="geometricPrecision"
-            className={`${open ? "opacity-0" : "opacity-100"} transition-opacity duration-150 block`}
-          >
-            <path
-              d="M2 3H20 M2 7H20 M2 11H20"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              vectorEffect="non-scaling-stroke"
-            />
-          </svg>
+ <svg
+  width="24"
+  height="16"
+  viewBox="0 0 24 16"
+  aria-hidden="true"
+  shapeRendering="geometricPrecision"
+  className={`${open ? "opacity-0" : "opacity-100"} transition-opacity duration-150 block`}
+>
+  {/* y: 3 / 8 / 13, x: 2..22 */}
+  <path
+    d="M2 3H22 M2 8H22 M2 13H22"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    vectorEffect="non-scaling-stroke"
+  />
+</svg>
 
-          {/* X (matched stroke, centered) */}
-          <svg
-            width="22"
-            height="14"
-            viewBox="0 0 22 14"
-            aria-hidden="true"
-            shapeRendering="geometricPrecision"
-            className={`${open ? "opacity-100" : "opacity-0"} transition-opacity duration-150 absolute inset-0 m-auto block`}
-          >
-            <path
-              d="M4 3 L18 11 M18 3 L4 11"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              vectorEffect="non-scaling-stroke"
-            />
-          </svg>
+{/* X (matched stroke, centered) */}
+<svg
+  width="24"
+  height="16"
+  viewBox="0 0 24 16"
+  aria-hidden="true"
+  shapeRendering="geometricPrecision"
+  className={`${open ? "opacity-100" : "opacity-0"} transition-opacity duration-150 absolute inset-0 m-auto block`}
+>
+  <path
+    d="M5 3 L19 13 M19 3 L5 13"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    vectorEffect="non-scaling-stroke"
+  />
+</svg>
         </button>
       </div>
 
