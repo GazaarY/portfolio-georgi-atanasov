@@ -16,15 +16,29 @@ export default function Header() {
   const panelRef = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
 
-  // Active section from viewport (IntersectionObserver)
+  // Viewport-based active section
   const activeId = useActiveSection(NAV.map((n) => n.id));
+
+  // Hash fallback (keeps aria-current correct on hash navigation / skip link)
+  const [hashId, setHashId] = useState<string>("");
+  useEffect(() => {
+    const update = () => setHashId(window.location.hash.replace("#", ""));
+    update();
+    window.addEventListener("hashchange", update);
+    return () => window.removeEventListener("hashchange", update);
+  }, []);
+
+  // Decide which id is "current" (URL hash wins, else observer)
+  const currentId = hashId || activeId || "";
+  const isCurrent = (href: string) => {
+    const id = href.replace("/#", "").replace("#", "");
+    return id && id === currentId ? "page" : undefined;
+  };
 
   // Close on Esc + outside click
   useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpen(false);
-    }
-    function onClick(e: MouseEvent) {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    const onClick = (e: MouseEvent) => {
       if (!open) return;
       const t = e.target as Node;
       if (
@@ -35,7 +49,7 @@ export default function Header() {
       ) {
         setOpen(false);
       }
-    }
+    };
     document.addEventListener("keydown", onKey);
     document.addEventListener("mousedown", onClick);
     return () => {
@@ -47,30 +61,31 @@ export default function Header() {
   // Focus trap when mobile menu is open
   useEffect(() => {
     if (!open || !panelRef.current) return;
-    const nodes = panelRef.current.querySelectorAll<HTMLElement>(
-      'a, button, [tabindex]:not([tabindex="-1"])',
+    const nodes = Array.from(
+      panelRef.current.querySelectorAll<HTMLElement>(
+        'a, button, [tabindex]:not([tabindex="-1"])',
+      ),
     );
     const first = nodes[0];
     const last = nodes[nodes.length - 1];
 
-    function onTab(e: KeyboardEvent) {
+    const onTab = (e: KeyboardEvent) => {
       if (e.key !== "Tab" || nodes.length === 0) return;
-      const active = document.activeElement;
-      if (e.shiftKey && active === first) {
+      const activeEl: Element | null = document.activeElement;
+      if (e.shiftKey && activeEl === first) {
         e.preventDefault();
         last?.focus();
-      } else if (!e.shiftKey && active === last) {
+      } else if (!e.shiftKey && activeEl === last) {
         e.preventDefault();
         first?.focus();
       }
-    }
+    };
 
     document.addEventListener("keydown", onTab);
     first?.focus();
     return () => document.removeEventListener("keydown", onTab);
   }, [open]);
 
-  // Common focus styles for all links & buttons
   const focusStyles =
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 rounded-md";
 
@@ -85,15 +100,15 @@ export default function Header() {
         {/* Desktop nav */}
         <nav className="hidden sm:flex items-center gap-8 text-sm" aria-label="Primary">
           {NAV.map((item) => {
-            const isActive = activeId === item.id;
+            const current = isCurrent(item.href);
             return (
               <Link
                 key={item.id}
                 href={item.href}
                 className={`gy-navlink ${focusStyles} ${
-                  isActive ? "font-semibold underline underline-offset-4" : ""
+                  current ? "font-semibold underline underline-offset-4" : ""
                 }`}
-                aria-current={isActive ? "page" : undefined}
+                aria-current={current}
               >
                 {item.label}
               </Link>
@@ -101,7 +116,7 @@ export default function Header() {
           })}
         </nav>
 
-        {/* Mobile menu button */}
+        {/* Mobile menu button (pixel-perfect icon, clipped) */}
         <button
           ref={btnRef}
           type="button"
@@ -109,28 +124,44 @@ export default function Header() {
           aria-controls="mobile-menu"
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
-          className={`sm:hidden inline-flex items-center justify-center w-9 h-9 rounded-md border border-gy-200 text-gy-700 hover:bg-gy-50 active:translate-y-[1px] transition ${focusStyles}`}
+          className={`sm:hidden inline-flex items-center justify-center w-9 h-9 rounded-md border border-gy-200 text-gy-700 hover:bg-gy-50 active:translate-y-[1px] transition ${focusStyles} overflow-hidden p-2 relative`}
         >
-          {/* simple hamburger / X */}
-          <span className="relative block w-4">
-            <span
-              className={`absolute inset-x-0 block h-0.5 bg-gy-900 transition-transform ${
-                open ? "translate-y-0 rotate-45" : "-translate-y-1.5"
-              }`}
-            />
-            <span
-              className={`absolute inset-x-0 block h-0.5 bg-gy-900 transition-opacity ${
-                open ? "opacity-0" : "opacity-100"
-              }`}
-              style={{ top: "7px" }}
-            />
-            <span
-              className={`absolute inset-x-0 block h-0.5 bg-gy-900 transition-transform ${
-                open ? "translate-y-0 -rotate-45" : "translate-y-1.5"
-              }`}
-              style={{ top: "14px" }}
-            />
-          </span>
+          {/* Hamburger (22x14, bars at y=3/7/11) */}
+ <svg
+  width="24"
+  height="16"
+  viewBox="0 0 24 16"
+  aria-hidden="true"
+  shapeRendering="geometricPrecision"
+  className={`${open ? "opacity-0" : "opacity-100"} transition-opacity duration-150 block`}
+>
+  {/* y: 3 / 8 / 13, x: 2..22 */}
+  <path
+    d="M2 3H22 M2 8H22 M2 13H22"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    vectorEffect="non-scaling-stroke"
+  />
+</svg>
+
+{/* X (matched stroke, centered) */}
+<svg
+  width="24"
+  height="16"
+  viewBox="0 0 24 16"
+  aria-hidden="true"
+  shapeRendering="geometricPrecision"
+  className={`${open ? "opacity-100" : "opacity-0"} transition-opacity duration-150 absolute inset-0 m-auto block`}
+>
+  <path
+    d="M5 3 L19 13 M19 3 L5 13"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    vectorEffect="non-scaling-stroke"
+  />
+</svg>
         </button>
       </div>
 
@@ -146,17 +177,22 @@ export default function Header() {
       >
         <nav className="py-3" aria-label="Primary mobile">
           <div className="gy-container flex flex-col gap-3 text-sm">
-            {NAV.map((item) => (
-              <Link
-                key={item.id}
-                href={item.href}
-                onClick={() => setOpen(false)}
-                className={`gy-navlink ${focusStyles}`}
-                aria-current={activeId === item.id ? "page" : undefined}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {NAV.map((item) => {
+              const current = isCurrent(item.href);
+              return (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  onClick={() => setOpen(false)}
+                  className={`gy-navlink ${focusStyles} ${
+                    current ? "font-semibold underline underline-offset-4" : ""
+                  }`}
+                  aria-current={current}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </div>
         </nav>
       </div>
