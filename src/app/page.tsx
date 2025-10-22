@@ -6,7 +6,7 @@ export default function Home() {
   return (
     <main className="flex-1 pt-10 md:pt-16">
       {/* WORK */}
-      <Section id="work" className="mt-8">
+      <Section id="work" className="mt-8 scroll-mt-36">
         <div className="gy-card p-6">
           <p className="text-gy-800">
             If this text looks slate-ish (not pure black), your `gy` palette is active.
@@ -22,7 +22,7 @@ export default function Home() {
       </Section>
 
       {/* ABOUT */}
-      <Section id="about" className="py-20 md:py-28">
+      <Section id="about" className="py-20 md:py-28 scroll-mt-36">
         <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-gy-900">
           About
         </h2>
@@ -33,7 +33,7 @@ export default function Home() {
 
       {/* CONTACT */}
       {/* Add min-height so it intersects the viewport even at the very bottom */}
-      <Section id="contact" className="py-20 md:py-28 min-h-[70vh]">
+      <Section id="contact" className="py-20 md:py-28 min-h-[70vh] scroll-mt-36">
         <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-gy-900">
           Contact
         </h2>

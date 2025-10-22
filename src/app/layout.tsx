@@ -13,7 +13,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className="h-full scroll-pt-24 md:scroll-pt-28"
+      className="h-full scroll-pt-32 md:scroll-pt-36"
     >
       <body
         suppressHydrationWarning
