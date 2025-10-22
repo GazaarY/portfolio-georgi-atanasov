@@ -116,52 +116,52 @@ export default function Header() {
           })}
         </nav>
 
-        {/* Mobile menu button (clipped, no overflow) */}
-       <button
-  ref={btnRef}
-  type="button"
-  aria-label="Toggle menu"
-  aria-controls="mobile-menu"
-  aria-expanded={open}
-  onClick={() => setOpen((v) => !v)}
-  className={`sm:hidden inline-flex items-center justify-center w-9 h-9 rounded-md border border-gy-200 text-gy-700 hover:bg-gy-50 active:translate-y-[1px] transition ${focusStyles} overflow-hidden p-2 relative`}
->
-  {/* Hamburger */}
-  <svg
-    width="20"
-    height="12"
-    viewBox="0 0 20 12"
-    aria-hidden="true"
-    shapeRendering="geometricPrecision"
-    className={`${open ? "opacity-0" : "opacity-100"} transition-opacity duration-150 block`}
-  >
-    <path
-      d="M2 2H18 M2 6H18 M2 10H18"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      vectorEffect="non-scaling-stroke"
-    />
-  </svg>
+        {/* Mobile menu button (pixel-perfect icon, clipped) */}
+        <button
+          ref={btnRef}
+          type="button"
+          aria-label="Toggle menu"
+          aria-controls="mobile-menu"
+          aria-expanded={open}
+          onClick={() => setOpen((v) => !v)}
+          className={`sm:hidden inline-flex items-center justify-center w-9 h-9 rounded-md border border-gy-200 text-gy-700 hover:bg-gy-50 active:translate-y-[1px] transition ${focusStyles} overflow-hidden p-2 relative`}
+        >
+          {/* Hamburger (22x14, bars at y=3/7/11) */}
+          <svg
+            width="22"
+            height="14"
+            viewBox="0 0 22 14"
+            aria-hidden="true"
+            shapeRendering="geometricPrecision"
+            className={`${open ? "opacity-0" : "opacity-100"} transition-opacity duration-150 block`}
+          >
+            <path
+              d="M2 3H20 M2 7H20 M2 11H20"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              vectorEffect="non-scaling-stroke"
+            />
+          </svg>
 
-  {/* X */}
-  <svg
-    width="20"
-    height="12"
-    viewBox="0 0 20 12"
-    aria-hidden="true"
-    shapeRendering="geometricPrecision"
-    className={`${open ? "opacity-100" : "opacity-0"} transition-opacity duration-150 absolute inset-0 m-auto block`}
-  >
-    <path
-      d="M3 2 L17 10 M17 2 L3 10"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      vectorEffect="non-scaling-stroke"
-    />
-  </svg>
-</button>
+          {/* X (matched stroke, centered) */}
+          <svg
+            width="22"
+            height="14"
+            viewBox="0 0 22 14"
+            aria-hidden="true"
+            shapeRendering="geometricPrecision"
+            className={`${open ? "opacity-100" : "opacity-0"} transition-opacity duration-150 absolute inset-0 m-auto block`}
+          >
+            <path
+              d="M4 3 L18 11 M18 3 L4 11"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              vectorEffect="non-scaling-stroke"
+            />
+          </svg>
+        </button>
       </div>
 
       {/* Mobile dropdown */}
