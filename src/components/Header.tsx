@@ -37,9 +37,7 @@ export default function Header() {
 
   // Close on Esc + outside click
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
     const onClick = (e: MouseEvent) => {
       if (!open) return;
       const t = e.target as Node;
@@ -63,7 +61,6 @@ export default function Header() {
   // Focus trap when mobile menu is open
   useEffect(() => {
     if (!open || !panelRef.current) return;
-
     const nodes = Array.from(
       panelRef.current.querySelectorAll<HTMLElement>(
         'a, button, [tabindex]:not([tabindex="-1"])',
@@ -75,7 +72,6 @@ export default function Header() {
     const onTab = (e: KeyboardEvent) => {
       if (e.key !== "Tab" || nodes.length === 0) return;
       const activeEl: Element | null = document.activeElement;
-
       if (e.shiftKey && activeEl === first) {
         e.preventDefault();
         last?.focus();
@@ -120,7 +116,7 @@ export default function Header() {
           })}
         </nav>
 
-        {/* Mobile menu button */}
+        {/* Mobile menu button (clipped, no overflow) */}
         <button
           ref={btnRef}
           type="button"
@@ -128,25 +124,23 @@ export default function Header() {
           aria-controls="mobile-menu"
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
-          className={`sm:hidden inline-flex items-center justify-center w-9 h-9 rounded-md border border-gy-200 text-gy-700 hover:bg-gy-50 active:translate-y-[1px] transition ${focusStyles}`}
+          className={`sm:hidden inline-flex items-center justify-center w-9 h-9 rounded-md border border-gy-200 text-gy-700 hover:bg-gy-50 active:translate-y-[1px] transition ${focusStyles} overflow-hidden p-2`}
         >
-          <span className="relative block w-4">
+          <span aria-hidden className="relative block h-3 w-5">
             <span
-              className={`absolute inset-x-0 block h-0.5 bg-gy-900 transition-transform ${
-                open ? "translate-y-0 rotate-45" : "-translate-y-1.5"
+              className={`absolute inset-x-0 top-0 h-0.5 rounded-full bg-gy-900 transition-transform origin-center ${
+                open ? "translate-y-1.5 rotate-45" : ""
               }`}
             />
             <span
-              className={`absolute inset-x-0 block h-0.5 bg-gy-900 transition-opacity ${
+              className={`absolute inset-x-0 top-1.5 h-0.5 rounded-full bg-gy-900 transition-opacity ${
                 open ? "opacity-0" : "opacity-100"
               }`}
-              style={{ top: "7px" }}
             />
             <span
-              className={`absolute inset-x-0 block h-0.5 bg-gy-900 transition-transform ${
-                open ? "translate-y-0 -rotate-45" : "translate-y-1.5"
+              className={`absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-gy-900 transition-transform origin-center ${
+                open ? "-translate-y-1.5 -rotate-45" : ""
               }`}
-              style={{ top: "14px" }}
             />
           </span>
         </button>
