@@ -117,33 +117,25 @@ export default function Header() {
         </nav>
 
         {/* Mobile menu button (clipped, no overflow) */}
-        <button
-          ref={btnRef}
-          type="button"
-          aria-label="Toggle menu"
-          aria-controls="mobile-menu"
-          aria-expanded={open}
-          onClick={() => setOpen((v) => !v)}
-          className={`sm:hidden inline-flex items-center justify-center w-9 h-9 rounded-md border border-gy-200 text-gy-700 hover:bg-gy-50 active:translate-y-[1px] transition ${focusStyles} overflow-hidden p-2`}
-        >
-          <span aria-hidden className="relative block h-3 w-5">
-            <span
-              className={`absolute inset-x-0 top-0 h-0.5 rounded-full bg-gy-900 transition-transform origin-center ${
-                open ? "translate-y-1.5 rotate-45" : ""
-              }`}
-            />
-            <span
-              className={`absolute inset-x-0 top-1.5 h-0.5 rounded-full bg-gy-900 transition-opacity ${
-                open ? "opacity-0" : "opacity-100"
-              }`}
-            />
-            <span
-              className={`absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-gy-900 transition-transform origin-center ${
-                open ? "-translate-y-1.5 -rotate-45" : ""
-              }`}
-            />
-          </span>
-        </button>
+       <button
+  ref={btnRef}
+  type="button"
+  aria-label="Toggle menu"
+  aria-controls="mobile-menu"
+  aria-expanded={open}
+  onClick={() => setOpen((v) => !v)}
+  className={`sm:hidden inline-flex items-center justify-center w-9 h-9 rounded-md border border-gy-200 text-gy-700 hover:bg-gy-50 active:translate-y-[1px] transition ${focusStyles} overflow-hidden p-2`}
+>
+  {/* perfectly centered 3-line icon */}
+  <svg width="20" height="12" viewBox="0 0 20 12" aria-hidden="true" className={`${open ? "opacity-0" : "opacity-100"} transition-opacity`}>
+    <path d="M1 1H19 M1 6H19 M1 11H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+  </svg>
+
+  {/* X icon for open state */}
+  <svg width="20" height="12" viewBox="0 0 20 12" aria-hidden="true" className={`${open ? "opacity-100" : "opacity-0"} transition-opacity absolute`}>
+    <path d="M3 1 L17 11 M17 1 L3 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+  </svg>
+</button>
       </div>
 
       {/* Mobile dropdown */}
