@@ -33,7 +33,7 @@ export default function Header() {
   const isCurrent = (href: string) => {
     const id = href.replace("/#", "").replace("#", "");
     return id && id === currentId ? "page" : undefined;
-  };
+    };
 
   // Close on Esc + outside click
   useEffect(() => {
@@ -90,7 +90,7 @@ export default function Header() {
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 rounded-md";
 
   return (
-    <header className="sticky top-0 z-50 bg-white/70 backdrop-blur">
+    <header className="sticky top-0 z-50 bg-inherit" role="banner">
       <div className="gy-container flex h-16 items-center justify-between">
         {/* Brand */}
         <Link href="/" className={`gy-brand ${focusStyles}`} aria-label="Go to homepage">
@@ -116,7 +116,7 @@ export default function Header() {
           })}
         </nav>
 
-        {/* Mobile menu button (pixel-perfect icon, clipped) */}
+        {/* Mobile menu button */}
         <button
           ref={btnRef}
           type="button"
@@ -126,52 +126,51 @@ export default function Header() {
           onClick={() => setOpen((v) => !v)}
           className={`sm:hidden inline-flex items-center justify-center w-9 h-9 rounded-md border border-gy-200 text-gy-700 hover:bg-gy-50 active:translate-y-[1px] transition ${focusStyles} overflow-hidden p-2 relative`}
         >
-          {/* Hamburger (22x14, bars at y=3/7/11) */}
- <svg
-  width="24"
-  height="16"
-  viewBox="0 0 24 16"
-  aria-hidden="true"
-  shapeRendering="geometricPrecision"
-  className={`${open ? "opacity-0" : "opacity-100"} transition-opacity duration-150 block`}
->
-  {/* y: 3 / 8 / 13, x: 2..22 */}
-  <path
-    d="M2 3H22 M2 8H22 M2 13H22"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    vectorEffect="non-scaling-stroke"
-  />
-</svg>
+          {/* Hamburger */}
+          <svg
+            width="24"
+            height="16"
+            viewBox="0 0 24 16"
+            aria-hidden="true"
+            shapeRendering="geometricPrecision"
+            className={`${open ? "opacity-0" : "opacity-100"} transition-opacity duration-150 block`}
+          >
+            <path
+              d="M2 3H22 M2 8H22 M2 13H22"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              vectorEffect="non-scaling-stroke"
+            />
+          </svg>
 
-{/* X (matched stroke, centered) */}
-<svg
-  width="24"
-  height="16"
-  viewBox="0 0 24 16"
-  aria-hidden="true"
-  shapeRendering="geometricPrecision"
-  className={`${open ? "opacity-100" : "opacity-0"} transition-opacity duration-150 absolute inset-0 m-auto block`}
->
-  <path
-    d="M5 3 L19 13 M19 3 L5 13"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    vectorEffect="non-scaling-stroke"
-  />
-</svg>
+          {/* X */}
+          <svg
+            width="24"
+            height="16"
+            viewBox="0 0 24 16"
+            aria-hidden="true"
+            shapeRendering="geometricPrecision"
+            className={`${open ? "opacity-100" : "opacity-0"} transition-opacity duration-150 absolute inset-0 m-auto block`}
+          >
+            <path
+              d="M5 3 L19 13 M19 3 L5 13"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              vectorEffect="non-scaling-stroke"
+            />
+          </svg>
         </button>
       </div>
 
-      {/* Mobile dropdown */}
+      {/* Mobile dropdown (no separator line) */}
       <div
         id="mobile-menu"
         ref={panelRef}
         role="dialog"
         aria-modal={open ? "true" : undefined}
-        className={`sm:hidden overflow-hidden border-t border-gy-200 transition-[max-height,opacity] duration-200 ${
+        className={`sm:hidden overflow-hidden transition-[max-height,opacity] duration-200 ${
           open ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
         }`}
       >

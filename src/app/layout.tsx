@@ -10,8 +10,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body suppressHydrationWarning>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className="h-full scroll-pt-24 md:scroll-pt-28"
+    >
+      <body
+        suppressHydrationWarning
+        className="min-h-screen bg-gy-canvas text-gy-900 antialiased"
+      >
         {/* Skip link for keyboard users */}
         <a
           href="#work"

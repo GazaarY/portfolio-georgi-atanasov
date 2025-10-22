@@ -7,29 +7,32 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Keep old classes like text-gy-800, border-gy-200, etc.
-        // Merge with slate to preserve any extra keys (e.g., 950), then override our core scale.
         gy: {
+          // keep slate scale, then override specific stops + our tokens
           ...colors.slate,
-          50: "#f5f8f8",
-          100: "#e8f0f0",
-          200: "#cfe0e0",
+          50:  "#f5f8f8",
+          100: "#e8f0ef",
+          200: "#cfe0e3",
           300: "#a9c8c9",
           400: "#7aa9ad",
-          500: "#4f8a92", // primary accent (blue-gray-green)
+          500: "#4fa892", // primary accent (blue-gray-green)
           600: "#3c6f76",
-          700: "#305a5f",
+          700: "#2b3a5f",
           800: "#27484c",
           900: "#1d3538",
-          accent: "#4f8a92",
+          accent: "#4fa892",
+          canvas: "#F7FBF9", // near-white with a calm green hint (Sage Mist)
         },
 
-        // Your existing spring-matte tokens
+        // existing spring-matte tokens
         paper: {
-          50: "#F6FBF8",
+          50:  "#F6FBF8",
           100: "#EFF8F2",
         },
+
         hairline: "#E7F0EA",
+
+        // general accent scale (kept as-is)
         accent: {
           400: "#2DD4BF",
           600: "#0F766E",
@@ -40,7 +43,8 @@ const config: Config = {
 
       // Card shadow stays as is
       boxShadow: {
-        card: "0 1px 2px rgba(17, 24, 39, 0.06), 0 1px 1px rgba(17, 24, 39, 0.04)",
+        card:
+          "0 1px 2px rgba(17, 24, 39, 0.06), 0 1px 1px rgba(17, 24, 39, 0.04)",
       },
 
       // Lock base typography scale (consistent rhythm)
