@@ -1,10 +1,20 @@
 // src/app/page.tsx
 import Link from "next/link";
 import Section from "../components/Section";
+import HeroSteps from "../components/HeroSteps";
 
 export default function Home() {
   return (
     <main className="flex-1 pt-24 md:pt-28">
+      <HeroSteps
+        steps={[
+          "Imagination is more important than knowledge.",
+          "…because knowledge has its limits.",
+        ]}
+        dwellMs={2200}
+        wipeMs={700}
+      />
+
       {/* WORK */}
       <Section id="work" className="mt-8 scroll-mt-36">
         <div className="gy-card p-6">
