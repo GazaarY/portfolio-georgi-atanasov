@@ -4,7 +4,7 @@ import Section from "../components/Section";
 
 export default function Home() {
   return (
-    <main className="flex-1 pt-10 md:pt-16">
+    <main className="flex-1 pt-24 md:pt-28">
       {/* WORK */}
       <Section id="work" className="mt-8 scroll-mt-36">
         <div className="gy-card p-6">

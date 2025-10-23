@@ -16,10 +16,8 @@ export default function Header() {
   const panelRef = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
 
-  // Viewport-based active section
   const activeId = useActiveSection(NAV.map((n) => n.id));
 
-  // Hash fallback (keeps aria-current correct on hash navigation / skip link)
   const [hashId, setHashId] = useState<string>("");
   useEffect(() => {
     const update = () => setHashId(window.location.hash.replace("#", ""));
@@ -28,14 +26,12 @@ export default function Header() {
     return () => window.removeEventListener("hashchange", update);
   }, []);
 
-  // Decide which id is "current" (URL hash wins, else observer)
   const currentId = hashId || activeId || "";
   const isCurrent = (href: string) => {
     const id = href.replace("/#", "").replace("#", "");
     return id && id === currentId ? "page" : undefined;
   };
 
-  // Close on Esc + outside click
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
     const onClick = (e: MouseEvent) => {
@@ -58,7 +54,6 @@ export default function Header() {
     };
   }, [open]);
 
-  // Focus trap when mobile menu is open
   useEffect(() => {
     if (!open || !panelRef.current) return;
     const nodes = Array.from(
@@ -90,14 +85,12 @@ export default function Header() {
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 rounded-md";
 
   return (
-<header className="sticky top-0 z-50 bg-gy-canvas" role="banner">
+    <header className="sticky top-0 z-50 bg-gy-canvas" role="banner">
       <div className="gy-container flex h-16 items-center justify-between">
-        {/* Brand */}
         <Link href="/" className={`gy-brand ${focusStyles}`} aria-label="Go to homepage">
           GazaarY
         </Link>
 
-        {/* Desktop nav */}
         <nav className="hidden sm:flex items-center gap-8 text-sm" aria-label="Primary">
           {NAV.map((item) => {
             const current = isCurrent(item.href);
@@ -116,7 +109,6 @@ export default function Header() {
           })}
         </nav>
 
-        {/* Mobile menu button */}
         <button
           ref={btnRef}
           type="button"
@@ -126,7 +118,6 @@ export default function Header() {
           onClick={() => setOpen((v) => !v)}
           className={`sm:hidden inline-flex items-center justify-center w-9 h-9 rounded-md border border-gy-200 text-gy-700 hover:bg-gy-50 active:translate-y-[1px] transition ${focusStyles} overflow-hidden p-2 relative`}
         >
-          {/* Hamburger */}
           <svg
             width="24"
             height="16"
@@ -144,7 +135,6 @@ export default function Header() {
             />
           </svg>
 
-          {/* X */}
           <svg
             width="24"
             height="16"
@@ -164,7 +154,6 @@ export default function Header() {
         </button>
       </div>
 
-      {/* Mobile dropdown (no separator line) */}
       <div
         id="mobile-menu"
         ref={panelRef}
