@@ -33,7 +33,7 @@ export default function Header() {
   const isCurrent = (href: string) => {
     const id = href.replace("/#", "").replace("#", "");
     return id && id === currentId ? "page" : undefined;
-    };
+  };
 
   // Close on Esc + outside click
   useEffect(() => {
@@ -90,7 +90,7 @@ export default function Header() {
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 rounded-md";
 
   return (
-    <header className="sticky top-0 z-50 bg-inherit" role="banner">
+<header className="sticky top-0 z-50 bg-gy-canvas" role="banner">
       <div className="gy-container flex h-16 items-center justify-between">
         {/* Brand */}
         <Link href="/" className={`gy-brand ${focusStyles}`} aria-label="Go to homepage">
