@@ -10,8 +10,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body suppressHydrationWarning>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className="h-full scroll-pt-32 md:scroll-pt-36"
+    >
+      <body
+        suppressHydrationWarning
+        className="min-h-screen bg-gy-canvas text-gy-900 antialiased"
+      >
         {/* Skip link for keyboard users */}
         <a
           href="#work"
@@ -29,7 +36,7 @@ export default function RootLayout({
 
         <div className="min-h-dvh flex flex-col">
           <Header />
-          <main className="flex-1 pt-10 md:pt-16">{children}</main>
+          <main className="flex-1 pt-24 md:pt-28">{children}</main>
           <Footer />
         </div>
       </body>

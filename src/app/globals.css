@@ -14,9 +14,10 @@
     color-scheme: light;
   }
 
-  /* Page background + main text (matte spring) */
+  /* Page text + AA smoothing (let layout.tsx control background) */
   body {
-    @apply bg-paper-50 text-gy-800 antialiased;
+    /* removed bg-paper-50 so bg-gy-canvas from <body class="..."> applies */
+    @apply text-gy-800 antialiased;
   }
 
   /* Headings slightly darker than body */
@@ -149,3 +150,8 @@ html:focus-within {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ================================
+   Sticky-header anchor offset (fallback)
+   ================================ */
+:target { scroll-margin-top: 7rem; } /* ~112px under the sticky header */

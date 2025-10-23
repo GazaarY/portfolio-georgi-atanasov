@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="bg-white/70 backdrop-blur">
+    <footer className="bg-inherit">
       {/* Full-bleed grid so the center stays truly centered and the left can hug the viewport edge */}
       <div className="w-full grid grid-cols-1 sm:grid-cols-3 items-center gap-3 py-6 sm:py-8 text-sm">
         {/* LEFT (desktop) / MIDDLE (mobile) — legal links */}
