@@ -54,7 +54,7 @@ def git_stats(hours, subpath=""):
     except subprocess.CalledProcessError:
         files_changed = 0
 
-    # lines +/- 
+    # lines +/-
     adds = dels = 0
     try:
         numstat = sh(["git", "log", "--since", since, "--pretty=tformat:", "--numstat"] + path_args)
