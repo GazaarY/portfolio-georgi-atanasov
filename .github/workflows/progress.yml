@@ -1,0 +1,50 @@
+name: Daily Progress Log
+
+on:
+  schedule:
+    - cron: "30 20 * * *"   # 22:30 Berlin (20:30 UTC)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install deps
+        run: pip install pytz
+
+      - name: Update PROGRESS.md
+        run: python scripts/update_progress.py
+        env:
+          PROGRESS_FILTER_PATH: src  # only count real code
+
+      - name: Create PR
+        id: cpr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "chore(progress): auto-update"
+          title: "chore(progress): auto-update"
+          body: "Daily progress log update."
+          branch: "progress-bot/update"
+          delete-branch: true
+          author: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+
+      - name: Auto-merge PR
+        if: steps.cpr.outputs.pull-request-number
+        uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+          merge-method: squash
