@@ -94,16 +94,43 @@ jobs:
           echo "fixed=$fixed" >> $GITHUB_OUTPUT
           echo "next=$next"   >> $GITHUB_OUTPUT
 
-      # 4) Capture optional ratings from the Run dialog
+      # 3.5) Auto-score D/C/R from today's stats (used if you don't type values)
+      - name: Auto-score ratings (fallback)
+        id: autoscore
+        run: |
+          COMM="${{ steps.stats.outputs.commits }}"
+          FILES="${{ steps.stats.outputs.files }}"
+          PLUS="${{ steps.stats.outputs.plus }}"
+          MINUS="${{ steps.stats.outputs.minus }}"
+          BUILT="${{ steps.bfnt.outputs.built }}"
+          FIXED="${{ steps.bfnt.outputs.fixed }}"
+
+          # Dedication: more commits/files ⇒ higher score
+          d=$(awk -v c="$COMM" -v f="$FILES" 'BEGIN{v=3+0.4*c+0.3*f; if(v<1)v=1; if(v>10)v=10; printf("%.0f", v)}')
+
+          # Comprehension: building more than fixing ⇒ higher score
+          comp=$(awk -v b="$BUILT" -v x="$FIXED" 'BEGIN{v=6+1.5*(b-x); if(v<1)v=1; if(v>10)v=10; printf("%.0f", v)}')
+
+          # Resilience: refactors/deletions & fixes indicate iteration grit
+          res=$(awk -v del="$MINUS" -v fx="$FIXED" 'BEGIN{v=5+0.02*del+0.5*fx; if(v<1)v=1; if(v>10)v=10; printf("%.0f", v)}')
+
+          echo "dedication_auto=$d"       >> $GITHUB_OUTPUT
+          echo "comprehension_auto=$comp" >> $GITHUB_OUTPUT
+          echo "resilience_auto=$res"     >> $GITHUB_OUTPUT
+
+      # 4) Capture ratings; if blank, use autoscore
       - name: Capture manual ratings (optional)
         id: ratings
         run: |
           d="${{ github.event.inputs.dedication }}"
           c="${{ github.event.inputs.comprehension }}"
           r="${{ github.event.inputs.resilience }}"
-          [ -z "$d" ] && d="—"
-          [ -z "$c" ] && c="—"
-          [ -z "$r" ] && r="—"
+
+          # Fallbacks from autoscore when inputs are blank
+          [ -z "$d" ] && d="${{ steps.autoscore.outputs.dedication_auto }}"
+          [ -z "$c" ] && c="${{ steps.autoscore.outputs.comprehension_auto }}"
+          [ -z "$r" ] && r="${{ steps.autoscore.outputs.resilience_auto }}"
+
           echo "dedication=$d"    >> $GITHUB_OUTPUT
           echo "comprehension=$c" >> $GITHUB_OUTPUT
           echo "resilience=$r"    >> $GITHUB_OUTPUT
