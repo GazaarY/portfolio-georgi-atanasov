@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: "30 20 * * *"   # 22:30 Berlin (20:30 UTC)
   push:
-    branches: [ main ]
+    branches: [ main ]      # also run whenever main gets new commits
   workflow_dispatch:
     inputs:
       dedication:
@@ -21,11 +21,19 @@ permissions:
   contents: write
   pull-requests: write
 
+# Prevent overlapping runs from writing the row twice
+concurrency:
+  group: progress-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   update:
     runs-on: ubuntu-latest
     env:
-      TZ: Europe/Berlin  # make "today" match your day in Berlin
+      TZ: Europe/Berlin
+      # Only count files/commits touching these paths (regex, beginning-anchored).
+      # Tune to your repo structure; empty string means "count everything".
+      PROGRESS_FILTER_PATH: '^(src|scripts|app|components)/'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -43,55 +51,94 @@ jobs:
           echo "until=$until"  >> $GITHUB_OUTPUT
           echo "date=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
 
-      # 2) Count commits / files / lines (+/-) for that window, excluding PROGRESS.md-only noise
-      - name: Calculate stats
+      # 2) Gather commits, apply path filter + skip-progress, then compute files/lines for filtered range
+      - name: Calculate stats (path-filtered, skip-progress aware)
         id: stats
+        shell: bash
         run: |
+          set -euo pipefail
           SINCE="${{ steps.window.outputs.since }}"
           UNTIL="${{ steps.window.outputs.until }}"
+          FILTER="${PROGRESS_FILTER_PATH:-}"
 
-          # All commit SHAs in the window (ignore merges)
-          mapfile -t SHAS < <(git log --since="$SINCE" --until="$UNTIL" --pretty=%H --no-merges)
+          # Get log lines: <SHA>\t<subject>
+          mapfile -t LOG < <(git log --since="$SINCE" --until="$UNTIL" --no-merges --pretty=$'%H\t%s')
 
-          if [ ${#SHAS[@]} -eq 0 ]; then
-            echo "commits=0" >> $GITHUB_OUTPUT
-            echo "files=0"   >> $GITHUB_OUTPUT
-            echo "plus=0"    >> $GITHUB_OUTPUT
-            echo "minus=0"   >> $GITHUB_OUTPUT
-            exit 0
+          included_shas=()
+          titles=""
+
+          for row in "${LOG[@]:-}"; do
+            sha="${row%%$'\t'*}"
+            subj="${row#*$'\t'}"
+            lcsubj="$(printf '%s' "$subj" | tr '[:upper:]' '[:lower:]')"
+
+            # opt-out: skip-progress in commit title
+            [[ "$lcsubj" =~ skip-progress ]] && continue
+
+            # if a path filter is set, only include commits that touched filtered paths
+            if [[ -n "$FILTER" ]]; then
+              if ! git diff-tree --no-commit-id --name-only -r "$sha" | grep -E -q "$FILTER"; then
+                continue
+              fi
+            fi
+
+            included_shas+=("$sha")
+            titles+="$lcsubj"$'\n'
+          done
+
+          COMMITS="${#included_shas[@]}"
+
+          # Determine range for today: first included commit's parent .. last included commit
+          RANGE=""
+          if (( COMMITS > 0 )); then
+            FIRST="${included_shas[-1]}"
+            LAST="${included_shas[0]}"
+            if PARENT=$(git rev-parse "$FIRST^" 2>/dev/null); then
+              RANGE="$PARENT..$LAST"
+            else
+              RANGE="$LAST"
+            fi
           fi
 
-          FIRST="${SHAS[-1]}"
-          PARENT="$(git rev-parse "$FIRST^" 2>/dev/null || true)"
-          if [ -z "$PARENT" ]; then
-            RANGE="$FIRST"
-          else
-            RANGE="$PARENT..HEAD"
+          # Count files/plus/minus in the filtered range (excluding PROGRESS.md)
+          files=0; plus=0; minus=0
+          if [[ -n "$RANGE" ]]; then
+            # Files changed
+            if [[ -n "$FILTER" ]]; then
+              files=$(git diff --name-only $RANGE | grep -v '^PROGRESS.md$' | grep -E "$FILTER" | sort -u | wc -l | tr -d ' ')
+            else
+              files=$(git diff --name-only $RANGE | grep -v '^PROGRESS.md$' | sort -u | wc -l | tr -d ' ')
+            fi
+
+            # Lines +/-
+            if [[ -n "$FILTER" ]]; then
+              # numstat: "<adds>\t<dels>\t<path>"
+              read plus minus < <(git diff --numstat $RANGE \
+                | grep -v $'\t''PROGRESS.md$' \
+                | awk -v re="$FILTER" '$3 ~ re {a+=$1; b+=$2} END{print (a+0), (b+0)}')
+            else
+              read plus minus < <(git diff --numstat $RANGE \
+                | grep -v $'\t''PROGRESS.md$' \
+                | awk '{a+=$1; b+=$2} END{print (a+0), (b+0)}')
+            fi
           fi
 
-          files=$(git diff --name-only $RANGE | grep -v '^PROGRESS.md$' | sort -u | wc -l | tr -d ' ')
-          read plus minus < <(git diff --numstat $RANGE | grep -v '[[:space:]]PROGRESS.md$' | awk '{a+=$1;b+=$2} END{print (a+0), (b+0)}')
-
-          commits=$(printf "%s\n" "${SHAS[@]}" | wc -l | tr -d ' ')
-
-          echo "commits=$commits" >> $GITHUB_OUTPUT
+          echo "commits=$COMMITS" >> $GITHUB_OUTPUT
           echo "files=$files"     >> $GITHUB_OUTPUT
           echo "plus=$plus"       >> $GITHUB_OUTPUT
           echo "minus=$minus"     >> $GITHUB_OUTPUT
 
-      # 3) Derive Built / Fixed / Next from commit titles (lowercased)
-      - name: Derive Built/Fixed/Next from commit titles
+          # Cache titles for next step (Built/Fixed/Next derivation)
+          printf '%s' "$titles" > titles.txt
+
+      # 3) Derive Built / Fixed / Next from titles of included commits
+      - name: Derive Built/Fixed/Next from titles
         id: bfnt
         run: |
-          SINCE="${{ steps.window.outputs.since }}"
-          UNTIL="${{ steps.window.outputs.until }}"
-
-          titles="$(git log --since="$SINCE" --until="$UNTIL" --pretty=%s --no-merges | tr '[:upper:]' '[:lower:]')"
-
+          titles="$(cat titles.txt 2>/dev/null || true)"
           built=$(printf "%s\n" "$titles" | grep -E '^(build:|feat:|refactor:)' | wc -l | tr -d ' ')
           fixed=$(printf "%s\n" "$titles" | grep -E '^fix:' | wc -l | tr -d ' ')
           next=$(printf "%s\n" "$titles" | grep -E '^(next:|chore\(next\):)' | wc -l | tr -d ' ')
-
           echo "built=$built" >> $GITHUB_OUTPUT
           echo "fixed=$fixed" >> $GITHUB_OUTPUT
           echo "next=$next"   >> $GITHUB_OUTPUT
@@ -107,13 +154,8 @@ jobs:
           BUILT="${{ steps.bfnt.outputs.built }}"
           FIXED="${{ steps.bfnt.outputs.fixed }}"
 
-          # Dedication: more commits/files ⇒ higher score
           d=$(awk -v c="$COMM" -v f="$FILES" 'BEGIN{v=3+0.4*c+0.3*f; if(v<1)v=1; if(v>10)v=10; printf("%.0f", v)}')
-
-          # Comprehension: building more than fixing ⇒ higher score
           comp=$(awk -v b="$BUILT" -v x="$FIXED" 'BEGIN{v=6+1.5*(b-x); if(v<1)v=1; if(v>10)v=10; printf("%.0f", v)}')
-
-          # Resilience: refactors/deletions & fixes indicate iteration grit
           res=$(awk -v del="$MINUS" -v fx="$FIXED" 'BEGIN{v=5+0.02*del+0.5*fx; if(v<1)v=1; if(v>10)v=10; printf("%.0f", v)}')
 
           echo "dedication_auto=$d"       >> $GITHUB_OUTPUT
@@ -127,12 +169,9 @@ jobs:
           d="${{ github.event.inputs.dedication }}"
           c="${{ github.event.inputs.comprehension }}"
           r="${{ github.event.inputs.resilience }}"
-
-          # Fallbacks from autoscore when inputs are blank
           [ -z "$d" ] && d="${{ steps.autoscore.outputs.dedication_auto }}"
           [ -z "$c" ] && c="${{ steps.autoscore.outputs.comprehension_auto }}"
           [ -z "$r" ] && r="${{ steps.autoscore.outputs.resilience_auto }}"
-
           echo "dedication=$d"    >> $GITHUB_OUTPUT
           echo "comprehension=$c" >> $GITHUB_OUTPUT
           echo "resilience=$r"    >> $GITHUB_OUTPUT
@@ -164,7 +203,7 @@ jobs:
             printf "\n%s\n" "$NEWROW" >> PROGRESS.md
           fi
 
-      # 6) Open a PR with the change (your existing flow)
+      # 6) Open a PR with the change
       - name: Create PR
         id: cpr
         uses: peter-evans/create-pull-request@v6
