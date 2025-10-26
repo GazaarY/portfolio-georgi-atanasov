@@ -10,11 +10,10 @@ These prefixes automatically fill the daily table in `PROGRESS.md`:
 > To keep these counted, merge PRs with **Merge commit** or **Rebase and merge** (not Squash), so the individual commit titles land on `main`.
 >
 > - View today’s table: [`PROGRESS.md`](./PROGRESS.md)
-- Run/inspect the job: GitHub → **Actions** → **Daily Progress Log**
+> - Run/inspect the job: GitHub → **Actions** → **Daily Progress Log**
+> - See **Work** → [docs/work-anchor.md](docs/work-anchor.md)
 
-- _The log auto-suggests Dedication/Comprehension/Resilience from daily stats; values you enter when running the workflow override the autoscore._
-
-
+_The log auto-suggests Dedication/Comprehension/Resilience from daily stats; values you enter when running the workflow override the autoscore._
 
 ## Getting Started
 
@@ -28,6 +27,7 @@ yarn dev
 pnpm dev
 # or
 bun dev
+
 
 ```
 
