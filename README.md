@@ -1,5 +1,14 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+### Commit prefixes → Progress Log
+These prefixes automatically fill the daily table in `PROGRESS.md`:
+
+- `build:` (or `feat:` / `refactor:`) → **Built**
+- `fix:` → **Fixed**
+- `next:` (or `chore(next):`) → **Next**
+
+> To keep these counted, merge PRs with **Merge commit** or **Rebase and merge** (not Squash), so the individual commit titles land on `main`.
+
 ## Getting Started
 
 First, run the development server:
@@ -12,6 +21,7 @@ yarn dev
 pnpm dev
 # or
 bun dev
+
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
