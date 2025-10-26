@@ -51,18 +51,31 @@ jobs:
           echo "until=$until"  >> $GITHUB_OUTPUT
           echo "date=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
 
+      # 1.5) Compute today's range on main by merge time (Berlin day)
+      - name: Compute today's commit range
+        id: range
+        run: |
+          SINCE="${{ steps.window.outputs.since }}"
+          # commit on main immediately before today's Berlin midnight
+          base="$(git rev-list -1 --before="$SINCE" origin/main || git rev-list -1 --before="$SINCE" main || true)"
+          if [ -z "$base" ]; then
+            # repo might be very new—count everything up to HEAD
+            echo "range=HEAD" >> $GITHUB_OUTPUT
+          else
+            echo "range=$base..HEAD" >> $GITHUB_OUTPUT
+          fi
+
       # 2) Gather commits, apply path filter + skip-progress, then compute files/lines for filtered range
       - name: Calculate stats (path-filtered, skip-progress aware)
         id: stats
         shell: bash
         run: |
           set -euo pipefail
-          SINCE="${{ steps.window.outputs.since }}"
-          UNTIL="${{ steps.window.outputs.until }}"
+          RANGE="${{ steps.range.outputs.range }}"
           FILTER="${PROGRESS_FILTER_PATH:-}"
 
-          # Get log lines: <SHA>\t<subject>
-          mapfile -t LOG < <(git log --since="$SINCE" --until="$UNTIL" --no-merges --pretty=$'%H\t%s')
+          # Get log lines within the computed range: <SHA>\t<subject>
+          mapfile -t LOG < <(git log $RANGE --no-merges --pretty=$'%H\t%s')
 
           included_shas=()
           titles=""
@@ -88,36 +101,36 @@ jobs:
 
           COMMITS="${#included_shas[@]}"
 
-          # Determine range for today: first included commit's parent .. last included commit
-          RANGE=""
+          # Determine diff range for files/line counts based on the first/last included commit
+          DIFF_RANGE=""
           if (( COMMITS > 0 )); then
             FIRST="${included_shas[-1]}"
             LAST="${included_shas[0]}"
             if PARENT=$(git rev-parse "$FIRST^" 2>/dev/null); then
-              RANGE="$PARENT..$LAST"
+              DIFF_RANGE="$PARENT..$LAST"
             else
-              RANGE="$LAST"
+              DIFF_RANGE="$LAST"
             fi
           fi
 
-          # Count files/plus/minus in the filtered range (excluding PROGRESS.md)
+          # Count files/plus/minus in the filtered diff range (excluding PROGRESS.md)
           files=0; plus=0; minus=0
-          if [[ -n "$RANGE" ]]; then
+          if [[ -n "$DIFF_RANGE" ]]; then
             # Files changed
             if [[ -n "$FILTER" ]]; then
-              files=$(git diff --name-only $RANGE | grep -v '^PROGRESS.md$' | grep -E "$FILTER" | sort -u | wc -l | tr -d ' ')
+              files=$(git diff --name-only $DIFF_RANGE | grep -v '^PROGRESS.md$' | grep -E "$FILTER" | sort -u | wc -l | tr -d ' ')
             else
-              files=$(git diff --name-only $RANGE | grep -v '^PROGRESS.md$' | sort -u | wc -l | tr -d ' ')
+              files=$(git diff --name-only $DIFF_RANGE | grep -v '^PROGRESS.md$' | sort -u | wc -l | tr -d ' ')
             fi
 
             # Lines +/-
             if [[ -n "$FILTER" ]]; then
               # numstat: "<adds>\t<dels>\t<path>"
-              read plus minus < <(git diff --numstat $RANGE \
+              read plus minus < <(git diff --numstat $DIFF_RANGE \
                 | grep -v $'\t''PROGRESS.md$' \
                 | awk -v re="$FILTER" '$3 ~ re {a+=$1; b+=$2} END{print (a+0), (b+0)}')
             else
-              read plus minus < <(git diff --numstat $RANGE \
+              read plus minus < <(git diff --numstat $DIFF_RANGE \
                 | grep -v $'\t''PROGRESS.md$' \
                 | awk '{a+=$1; b+=$2} END{print (a+0), (b+0)}')
             fi
