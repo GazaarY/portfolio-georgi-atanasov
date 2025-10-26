@@ -1,4 +1,7 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app). _copy tweak_
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+[![Daily Progress Log](https://github.com/GazaarY/portfolio-georgi-atanasov/actions/workflows/progress.yml/badge.svg)](https://github.com/GazaarY/portfolio-georgi-atanasov/actions/workflows/progress.yml)
+
+
 
 ### Commit prefixes → Progress Log
 These prefixes automatically fill the daily table in `PROGRESS.md`:
