@@ -30,7 +30,7 @@ jobs:
       - name: Update PROGRESS.md
         run: python scripts/update_progress.py
         env:
-          PROGRESS_FILTER_PATH: src  # only count real code
+          PROGRESS_FILTER_PATH: ""  # TEMP: count all paths (remove filter)
 
       - name: Create PR
         id: cpr
