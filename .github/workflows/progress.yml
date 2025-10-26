@@ -3,6 +3,8 @@ name: Daily Progress Log
 on:
   schedule:
     - cron: "30 20 * * *"   # 22:30 Berlin (20:30 UTC)
+  push:
+    branches: [ main ]
   workflow_dispatch:
     inputs:
       dedication:
