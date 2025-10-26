@@ -12,6 +12,8 @@ permissions:
 jobs:
   update:
     runs-on: ubuntu-latest
+    env:
+      TZ: Europe/Berlin  # make "today" match your day in Berlin
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -19,19 +21,87 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.ref }}
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.x"
+      # 1) Compute the Berlin day window and a human date string
+      - name: Compute today's window (Berlin)
+        id: window
+        run: |
+          since="$(date -d 'today 00:00' +'%Y-%m-%d %H:%M:%S %z')"
+          until="$(date -d 'tomorrow 00:00' +'%Y-%m-%d %H:%M:%S %z')"
+          echo "since=$since"  >> $GITHUB_OUTPUT
+          echo "until=$until"  >> $GITHUB_OUTPUT
+          echo "date=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
 
-      - name: Install deps
-        run: pip install pytz
+      # 2) Count commits / files / lines (+/-) for that window, excluding PROGRESS.md-only noise
+      - name: Calculate stats
+        id: stats
+        run: |
+          SINCE="${{ steps.window.outputs.since }}"
+          UNTIL="${{ steps.window.outputs.until }}"
 
-      - name: Update PROGRESS.md
-        run: python scripts/update_progress.py
-        env:
-          PROGRESS_FILTER_PATH: ""  # TEMP: count all paths (remove filter)
+          # All commit SHAs in the window (ignore merges)
+          mapfile -t SHAS < <(git log --since="$SINCE" --until="$UNTIL" --pretty=%H --no-merges)
 
+          if [ ${#SHAS[@]} -eq 0 ]; then
+            echo "commits=0" >> $GITHUB_OUTPUT
+            echo "files=0"   >> $GITHUB_OUTPUT
+            echo "plus=0"    >> $GITHUB_OUTPUT
+            echo "minus=0"   >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          FIRST="${SHAS[-1]}"
+          PARENT="$(git rev-parse "$FIRST^" 2>/dev/null || true)"
+          if [ -z "$PARENT" ]; then
+            RANGE="$FIRST"
+          else
+            RANGE="$PARENT..HEAD"
+          fi
+
+          files=$(git diff --name-only $RANGE | grep -v '^PROGRESS.md$' | sort -u | wc -l | tr -d ' ')
+          read plus minus < <(git diff --numstat $RANGE | grep -v '[[:space:]]PROGRESS.md$' | awk '{a+=$1;b+=$2} END{print (a+0), (b+0)}')
+
+          commits=$(printf "%s\n" "${SHAS[@]}" | wc -l | tr -d ' ')
+
+          echo "commits=$commits" >> $GITHUB_OUTPUT
+          echo "files=$files"     >> $GITHUB_OUTPUT
+          echo "plus=$plus"       >> $GITHUB_OUTPUT
+          echo "minus=$minus"     >> $GITHUB_OUTPUT
+
+      # 3) Update/append today's row in PROGRESS.md (leave the rest of the table intact)
+      - name: Update PROGRESS.md (Berlin-aware)
+        run: |
+          DATE="${{ steps.window.outputs.date }}"
+          COMM="${{ steps.stats.outputs.commits }}"
+          FILES="${{ steps.stats.outputs.files }}"
+          PLUS="${{ steps.stats.outputs.plus }}"
+          MINUS="${{ steps.stats.outputs.minus }}"
+
+          NEWROW="| ${DATE} | ${COMM} | ${FILES} | +${PLUS}/-${MINUS} | — | — | — | — | — |"
+
+          if grep -qE "^\|[ ]*${DATE}[ ]*\|" PROGRESS.md; then
+            # Replace existing row for DATE (preserve columns after Lines +/-)
+            tmp="$(mktemp)"
+            awk -v d="$DATE" -v c="$COMM" -v f="$FILES" -v p="$PLUS" -v m="$MINUS" '
+              BEGIN{FS=OFS="|"}
+              {
+                if ($0 ~ "^[ ]*\\|[ ]*" d "[ ]*\\|") {
+                  # Columns: 1(empty) 2(Date) 3(Commits) 4(Files) 5(Lines +/-) 6(Built) 7(Fixed) 8(Next) 9(Dedication) 10(Comprehension) 11(Resilience) 12(empty)
+                  $3=" " d " "
+                  $4=" " c " "
+                  $5=" " f " "
+                  $6=sprintf(" +%d/-%d ", p, m)
+                  print $0=$1 FS $2 FS $3 FS $4 FS $6 FS $7 FS $8 FS $9 FS $10 FS $11 FS $12
+                } else {
+                  print
+                }
+              }
+            ' PROGRESS.md > "$tmp" && mv "$tmp" PROGRESS.md
+          else
+            # Append a new row at the end if today's row doesn't exist
+            printf "\n%s\n" "$NEWROW" >> PROGRESS.md
+          fi
+
+      # 4) Open a PR with the change (your existing flow)
       - name: Create PR
         id: cpr
         uses: peter-evans/create-pull-request@v6
