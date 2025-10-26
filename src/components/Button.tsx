@@ -5,4 +5,4 @@ export default function Button() {
 }
 
 
-feat: add test Button component
+feat: add test Button v2 component
