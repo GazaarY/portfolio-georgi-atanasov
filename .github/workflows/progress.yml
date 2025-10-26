@@ -67,7 +67,24 @@ jobs:
           echo "plus=$plus"       >> $GITHUB_OUTPUT
           echo "minus=$minus"     >> $GITHUB_OUTPUT
 
-      # 3) Update/append today's row in PROGRESS.md (leave the rest of the table intact)
+      # 3) Derive Built / Fixed / Next from commit titles (lowercased)
+      - name: Derive Built/Fixed/Next from commit titles
+        id: bfnt
+        run: |
+          SINCE="${{ steps.window.outputs.since }}"
+          UNTIL="${{ steps.window.outputs.until }}"
+
+          titles="$(git log --since="$SINCE" --until="$UNTIL" --pretty=%s --no-merges | tr '[:upper:]' '[:lower:]')"
+
+          built=$(printf "%s\n" "$titles" | grep -E '^(build:|feat:|refactor:)' | wc -l | tr -d ' ')
+          fixed=$(printf "%s\n" "$titles" | grep -E '^fix:' | wc -l | tr -d ' ')
+          next=$(printf "%s\n" "$titles" | grep -E '^(next:|chore\(next\):)' | wc -l | tr -d ' ')
+
+          echo "built=$built" >> $GITHUB_OUTPUT
+          echo "fixed=$fixed" >> $GITHUB_OUTPUT
+          echo "next=$next"   >> $GITHUB_OUTPUT
+
+      # 4) Update/append today's row in PROGRESS.md (replace whole line if exists)
       - name: Update PROGRESS.md (Berlin-aware)
         run: |
           DATE="${{ steps.window.outputs.date }}"
@@ -75,33 +92,23 @@ jobs:
           FILES="${{ steps.stats.outputs.files }}"
           PLUS="${{ steps.stats.outputs.plus }}"
           MINUS="${{ steps.stats.outputs.minus }}"
+          BUILT="${{ steps.bfnt.outputs.built }}"
+          FIXED="${{ steps.bfnt.outputs.fixed }}"
+          NEXT="${{ steps.bfnt.outputs.next }}"
 
-          NEWROW="| ${DATE} | ${COMM} | ${FILES} | +${PLUS}/-${MINUS} | — | — | — | — | — |"
+          NEWROW="| ${DATE} | ${COMM} | ${FILES} | +${PLUS}/-${MINUS} | ${BUILT} | ${FIXED} | ${NEXT} | — | — | — |"
 
           if grep -qE "^\|[ ]*${DATE}[ ]*\|" PROGRESS.md; then
-            # Replace existing row for DATE (preserve columns after Lines +/-)
             tmp="$(mktemp)"
-            awk -v d="$DATE" -v c="$COMM" -v f="$FILES" -v p="$PLUS" -v m="$MINUS" '
-              BEGIN{FS=OFS="|"}
-              {
-                if ($0 ~ "^[ ]*\\|[ ]*" d "[ ]*\\|") {
-                  # Columns: 1(empty) 2(Date) 3(Commits) 4(Files) 5(Lines +/-) 6(Built) 7(Fixed) 8(Next) 9(Dedication) 10(Comprehension) 11(Resilience) 12(empty)
-                  $3=" " d " "
-                  $4=" " c " "
-                  $5=" " f " "
-                  $6=sprintf(" +%d/-%d ", p, m)
-                  print $0=$1 FS $2 FS $3 FS $4 FS $6 FS $7 FS $8 FS $9 FS $10 FS $11 FS $12
-                } else {
-                  print
-                }
-              }
+            awk -v d="$DATE" -v r="$NEWROW" '
+              $0 ~ "^\\|[ ]*" d "[ ]*\\|" { print r; next }
+              { print }
             ' PROGRESS.md > "$tmp" && mv "$tmp" PROGRESS.md
           else
-            # Append a new row at the end if today's row doesn't exist
             printf "\n%s\n" "$NEWROW" >> PROGRESS.md
           fi
 
-      # 4) Open a PR with the change (your existing flow)
+      # 5) Open a PR with the change (your existing flow)
       - name: Create PR
         id: cpr
         uses: peter-evans/create-pull-request@v6
