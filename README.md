@@ -12,6 +12,9 @@ These prefixes automatically fill the daily table in `PROGRESS.md`:
 > - View today’s table: [`PROGRESS.md`](./PROGRESS.md)
 - Run/inspect the job: GitHub → **Actions** → **Daily Progress Log**
 
+- _The log auto-suggests Dedication/Comprehension/Resilience from daily stats; values you enter when running the workflow override the autoscore._
+
+
 
 ## Getting Started
 
