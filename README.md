@@ -8,6 +8,10 @@ These prefixes automatically fill the daily table in `PROGRESS.md`:
 - `next:` (or `chore(next):`) → **Next**
 
 > To keep these counted, merge PRs with **Merge commit** or **Rebase and merge** (not Squash), so the individual commit titles land on `main`.
+>
+> - View today’s table: [`PROGRESS.md`](./PROGRESS.md)
+- Run/inspect the job: GitHub → **Actions** → **Daily Progress Log**
+
 
 ## Getting Started
 
