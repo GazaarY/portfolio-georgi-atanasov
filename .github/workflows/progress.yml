@@ -4,6 +4,16 @@ on:
   schedule:
     - cron: "30 20 * * *"   # 22:30 Berlin (20:30 UTC)
   workflow_dispatch:
+    inputs:
+      dedication:
+        description: "Dedication (1–10)"
+        required: false
+      comprehension:
+        description: "Comprehension (1–10)"
+        required: false
+      resilience:
+        description: "Resilience (1–10)"
+        required: false
 
 permissions:
   contents: write
@@ -84,7 +94,21 @@ jobs:
           echo "fixed=$fixed" >> $GITHUB_OUTPUT
           echo "next=$next"   >> $GITHUB_OUTPUT
 
-      # 4) Update/append today's row in PROGRESS.md (replace whole line if exists)
+      # 4) Capture optional ratings from the Run dialog
+      - name: Capture manual ratings (optional)
+        id: ratings
+        run: |
+          d="${{ github.event.inputs.dedication }}"
+          c="${{ github.event.inputs.comprehension }}"
+          r="${{ github.event.inputs.resilience }}"
+          [ -z "$d" ] && d="—"
+          [ -z "$c" ] && c="—"
+          [ -z "$r" ] && r="—"
+          echo "dedication=$d"    >> $GITHUB_OUTPUT
+          echo "comprehension=$c" >> $GITHUB_OUTPUT
+          echo "resilience=$r"    >> $GITHUB_OUTPUT
+
+      # 5) Update/append today's row in PROGRESS.md (replace whole line if exists)
       - name: Update PROGRESS.md (Berlin-aware)
         run: |
           DATE="${{ steps.window.outputs.date }}"
@@ -95,8 +119,11 @@ jobs:
           BUILT="${{ steps.bfnt.outputs.built }}"
           FIXED="${{ steps.bfnt.outputs.fixed }}"
           NEXT="${{ steps.bfnt.outputs.next }}"
+          DEDI="${{ steps.ratings.outputs.dedication }}"
+          COMP="${{ steps.ratings.outputs.comprehension }}"
+          RESI="${{ steps.ratings.outputs.resilience }}"
 
-          NEWROW="| ${DATE} | ${COMM} | ${FILES} | +${PLUS}/-${MINUS} | ${BUILT} | ${FIXED} | ${NEXT} | — | — | — |"
+          NEWROW="| ${DATE} | ${COMM} | ${FILES} | +${PLUS}/-${MINUS} | ${BUILT} | ${FIXED} | ${NEXT} | ${DEDI} | ${COMP} | ${RESI} |"
 
           if grep -qE "^\|[ ]*${DATE}[ ]*\|" PROGRESS.md; then
             tmp="$(mktemp)"
@@ -108,7 +135,7 @@ jobs:
             printf "\n%s\n" "$NEWROW" >> PROGRESS.md
           fi
 
-      # 5) Open a PR with the change (your existing flow)
+      # 6) Open a PR with the change (your existing flow)
       - name: Create PR
         id: cpr
         uses: peter-evans/create-pull-request@v6
